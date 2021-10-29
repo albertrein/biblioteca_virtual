@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:biblioteca_virtual/Models/biblioteca.dart';
+import 'package:biblioteca_virtual/Utils/biblioteca_helper.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +19,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Biblioteca Virtual'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -30,6 +34,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  DatabaseHelper helper = DatabaseHelper();
 
   void _incrementCounter() {
     setState(() {
@@ -49,20 +54,29 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Biblioteca virtual',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            IconButton(onPressed: _todosOsLivros, icon: const Icon(Icons.edit))
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: _insereLivro,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  void _insereLivro() async{
+    
+    var biblioteca = BibliotecaVirtual("Livro teste #1", "Sigmun Bauman", "Colapside", 0);
+    int response = await helper.insereLivro(biblioteca);
+
+    print(response);
+  }
+
+  void _todosOsLivros() async{
+    print(await helper.listaDeTodosOsLivros());
   }
 }
