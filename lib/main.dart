@@ -33,13 +33,90 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   DatabaseHelper helper = DatabaseHelper();
+  List<BibliotecaVirtual> listaLivros = [];
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  void _todosOsLivros() async{
+    listaLivros = await helper.listaDeTodosOsLivros(); 
+    print(listaLivros.toString());
+    print("");
+    print(listaLivros.runtimeType);
+    for(int i = 0; i < listaLivros.length; i++){
+      // ignore: avoid_print
+      print(listaLivros[i].toString());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    updateListView();
+  }
+
+  Widget getTodosListView() {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      itemCount: listaLivros.length,
+      itemBuilder: (BuildContext context, int position) {
+        BibliotecaVirtual livro = listaLivros[position];
+        return Card(
+          color: Colors.white,
+          elevation: 2.0,
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.blue,
+              child: Text(livro.title),
+            ),
+            title:
+            Text(livro.title, style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(livro.autor),
+            trailing: GestureDetector(
+                child: Icon(
+                  Icons.delete,
+                  color: Colors.blueAccent,
+                ),
+                onTap: () {
+                      //_delete(context, livro);
+                }),
+            onTap: () {
+              print("Lista detalhes");
+              //navigateToDetail(livro, livro.title);
+
+              //faça o navigate
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  titulosLivros(){
+    return (
+      FutureBuilder<List>(
+        future: helper.listaDeTodosOsLivros(),
+        initialData: [],
+        builder: (context, snapshot) {
+          return snapshot.hasData
+              ? ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (_, int position) {
+                    final item = snapshot.data![position];
+                    //get your item data here ...
+                    return Card(
+                      child: ListTile(
+                        title: Text(
+                            "Employee Name: " + snapshot.data![position].row[1]),
+                      ),
+                    );
+                  },
+                )
+              : Center(
+                  child: CircularProgressIndicator(),
+                );
+        },
+      )
+    );
   }
 
   @override
@@ -56,7 +133,8 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'Biblioteca virtual',
             ),
-            IconButton(onPressed: _todosOsLivros, icon: const Icon(Icons.edit))
+            IconButton(onPressed: _todosOsLivros, icon: const Icon(Icons.edit)),
+            getTodosListView()
           ],
         ),
       ),
@@ -76,7 +154,12 @@ class _MyHomePageState extends State<MyHomePage> {
     print(response);
   }
 
-  void _todosOsLivros() async{
-    print(await helper.listaDeTodosOsLivros());
+  void updateListView() {
+    Future<List<BibliotecaVirtual>> todoListFuture = helper.listaDeTodosOsLivros();
+      todoListFuture.then((listaLivros) {
+        setState(() {
+          this.listaLivros = listaLivros;
+        });
+      });
   }
 }

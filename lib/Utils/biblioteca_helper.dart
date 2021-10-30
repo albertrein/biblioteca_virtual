@@ -22,7 +22,7 @@ class DatabaseHelper {
   DatabaseHelper._createInstancia(); //Construtor nomeado.
 
 /*Código do flutter */
-DatabaseHelper.ensureInitialized();
+  DatabaseHelper.ensureInitialized();
 
   final Future<Database> database = getDatabasesPath().then((String path) {
     return openDatabase(
@@ -38,67 +38,31 @@ DatabaseHelper.ensureInitialized();
     );
   });
 
-Future<int> insereLivro(BibliotecaVirtual biblioteca) async {
-  // Get a reference to the database.
-  final db = await database;
-
-  // Insert the Dog into the correct table. You might also specify the
-  // `conflictAlgorithm` to use in case the same dog is inserted twice.
-  //
-  // In this case, replace any previous data.
-  return await db.insert(
-    bibliotecaTable,
-    biblioteca.toMap(),
-    conflictAlgorithm: ConflictAlgorithm.replace,
-  );
-}
-
-Future<List<Map>> listaDeTodosOsLivros() async {
-  // Get a reference to the database.
-  final db = await database;
-
-  // Query the table for all The Dogs.
-  final List<Map<String, dynamic>> maps = await db.query('livro_table');
-
-  // Convert the List<Map<String, dynamic> into a List<Dog>.
-  return maps;
-}
-/**fim do código do flutter */
-
-/*
-  factory DatabaseHelper() {
-    if (_databaseHelper == null) {
-      _databaseHelper = DatabaseHelper._createInstancia();
-    }
-    return _databaseHelper;
+  Future<int> insereLivro(BibliotecaVirtual biblioteca) async {
+    final db = await database;
+    return await db.insert(
+      bibliotecaTable,
+      biblioteca.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
+  Future <List<BibliotecaVirtual>> listaDeTodosOsLivros() async {
+    final db = await database;
 
-  void _createDb(Database db, int newVersion) async {
-    await db.execute(
-        'Create table $bibliotecaTable($colId INTEGER PRIMARY KEY AUTOINCREMENT, $colTitulo TEXT, '
-            '$colAutor TEXT, $colEditora Text, $colLido INTEGER)');
-  }
+    var maps = await db.query('livro_table');
 
-  Future<Database> initializeDatabase() async{
-    Directory diretorio = await getApplicationDocumentsDirectory();
-    String path=diretorio.path+ "biblioteca.db";
-    var todoDatabase= await openDatabase(path, version: 1,onCreate:_createDb );
-    return todoDatabase;
+    int count = maps.length;
+      List<BibliotecaVirtual> livros = [];
+      for(int i=0;i<count; i++){
+        livros.add(BibliotecaVirtual.fromMapObject(maps[i]));
+      }
+      return livros;
+    
+    // Convert the List<Map<String, dynamic> into a List<Dog>.
+    //return maps.isNotEmpty ? BibliotecaVirtual.fromMap(maps.first) : Null ;
+    /*List<BibliotecaVirtual> list = maps.isNotEmpty ? maps.map((c) => BibliotecaVirtual.fromMap(c)).toList() : [];
+    return maps.toList();*/
   }
-
-  Future<Database> get database async{
-    if(_database == null){
-      _database = await initializeDatabase();
-    }
-    return _database;
-  }
-
-  Future<int> insertLivro(BibliotecaVirtual bibliotecaVirtual) async{
-    Database db = await this.database;
-    var result=db.insert(bibliotecaTable, bibliotecaVirtual.toMap());
-    return result;
-  }
-*/
 
 }
