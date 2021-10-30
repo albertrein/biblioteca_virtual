@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:biblioteca_virtual/Models/biblioteca.dart';
 import 'package:biblioteca_virtual/Utils/biblioteca_helper.dart';
+import 'package:biblioteca_virtual/Views/livro_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -77,7 +78,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Colors.blueAccent,
                 ),
                 onTap: () {
-                      //_delete(context, livro);
+                    _delete(context, livro);
                 }),
             onTap: () {
               print("Lista detalhes");
@@ -147,11 +148,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _insereLivro() async{
-    
-    var biblioteca = BibliotecaVirtual("Livro teste #1", "Sigmun Bauman", "Colapside", 0);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => Livro()));
+    return;
+    var biblioteca = BibliotecaVirtual("Livro teste #2", "Carl Marx", "Saraiva", 0);
     int response = await helper.insereLivro(biblioteca);
 
     print(response);
+    updateListView();
+  }
+
+  void _delete(context, livro) async{
+    print('Acao: deletar');
+    int response = await helper.excluiLivro(livro.id);
+    print(">> $response");
+    updateListView();
   }
 
   void updateListView() {

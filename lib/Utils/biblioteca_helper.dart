@@ -24,7 +24,7 @@ class DatabaseHelper {
 /*Código do flutter */
   DatabaseHelper.ensureInitialized();
 
-  final Future<Database> database = getDatabasesPath().then((String path) {
+  static final Future<Database> database = getDatabasesPath().then((String path) {
     return openDatabase(
       join(path, 'biblioteca_database.db'),
       onCreate: (db, version) {
@@ -64,5 +64,12 @@ class DatabaseHelper {
     /*List<BibliotecaVirtual> list = maps.isNotEmpty ? maps.map((c) => BibliotecaVirtual.fromMap(c)).toList() : [];
     return maps.toList();*/
   }
+
+  Future<int> excluiLivro(int id) async{
+    final db = await database;
+
+    int result = await db.rawDelete('DELETE FROM $bibliotecaTable  WHERE $colId=$id');
+    return result;
+}
 
 }
