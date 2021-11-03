@@ -7,7 +7,6 @@ import 'package:biblioteca_virtual/Models/biblioteca.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
 
-//Manipula o sqlite
 class DatabaseHelper {
  // static DatabaseHelper _databaseHelper; //SINGLETON//PADRAO DE PROJETO
  // static Database _database; // singleton database
@@ -18,10 +17,9 @@ class DatabaseHelper {
   String colEditora = 'editora';
   String colLido = 'lido';
 
-  DatabaseHelper(); //Construtor nomeado.
-  DatabaseHelper._createInstancia(); //Construtor nomeado.
+  DatabaseHelper();
+  DatabaseHelper._createInstancia();
 
-/*Código do flutter */
   DatabaseHelper.ensureInitialized();
 
   static final Future<Database> database = getDatabasesPath().then((String path) {
@@ -60,19 +58,41 @@ class DatabaseHelper {
   Future <List<BibliotecaVirtual>> listaDeTodosOsLivros() async {
     final db = await database;
 
-    var maps = await db.query('livro_table');
-
+    var maps = await db.query(bibliotecaTable);
     int count = maps.length;
-      List<BibliotecaVirtual> livros = [];
-      for(int i=0;i<count; i++){
-        livros.add(BibliotecaVirtual.fromMapObject(maps[i]));
-      }
-      return livros;
-    
-    // Convert the List<Map<String, dynamic> into a List<Dog>.
-    //return maps.isNotEmpty ? BibliotecaVirtual.fromMap(maps.first) : Null ;
-    /*List<BibliotecaVirtual> list = maps.isNotEmpty ? maps.map((c) => BibliotecaVirtual.fromMap(c)).toList() : [];
-    return maps.toList();*/
+    List<BibliotecaVirtual> livros = [];
+    for(int i=0;i<count; i++){
+      livros.add(BibliotecaVirtual.fromMapObject(maps[i]));
+    }
+    return livros;
+  }
+
+  Future <List<BibliotecaVirtual>> getListaLivrosOrdenadosPorTitulo() async {
+    return await _livrosOrdenadosPor(colTitulo);
+  }
+
+  Future <List<BibliotecaVirtual>> getListaLivrosOrdenadosPorAutor() async {
+    return await _livrosOrdenadosPor(colAutor);
+  }
+
+  Future <List<BibliotecaVirtual>> getListaLivrosOrdenadosPorEditora() async {
+    return await _livrosOrdenadosPor(colEditora);
+  }
+
+  Future <List<BibliotecaVirtual>> getListaLivrosOrdenadosPorLido() async {
+    return await _livrosOrdenadosPor(colLido);
+  }
+
+  Future <List<BibliotecaVirtual>> _livrosOrdenadosPor(String colunaOrdenamento) async {
+    final db = await database;
+
+    var maps = await db.rawQuery("SELECT * FROM $bibliotecaTable ORDER BY $colunaOrdenamento");
+    int count = maps.length;
+    List<BibliotecaVirtual> livros = [];
+    for(int i=0;i<count; i++){
+      livros.add(BibliotecaVirtual.fromMapObject(maps[i]));
+    }
+    return livros;
   }
 
   Future<int> excluiLivro(int id) async{
@@ -80,6 +100,6 @@ class DatabaseHelper {
 
     int result = await db.rawDelete('DELETE FROM $bibliotecaTable  WHERE $colId=$id');
     return result;
-}
+  }
 
 }

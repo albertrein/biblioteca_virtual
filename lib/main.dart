@@ -51,10 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    updateListView();
+    listagemTodosLivros();
   }
 
-  Widget getTodosListView() {
+  Widget getLivrosListView() {
     return ListView.builder(
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
@@ -69,8 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
               backgroundColor: Colors.blue,
               child: Text(livro.title),
             ),
-            title: Text(livro.title, style: TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text(livro.autor),
+            title: Text(livro.title+" - "+livro.autor, style: TextStyle(fontWeight: FontWeight.bold)),
+            subtitle: Text(livro.editora),
             trailing: GestureDetector(
               child: const Icon(
                 Icons.delete,
@@ -89,34 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  titulosLivros(){
-    return (
-      FutureBuilder<List>(
-        future: helper.listaDeTodosOsLivros(),
-        initialData: [],
-        builder: (context, snapshot) {
-          return snapshot.hasData
-              ? ListView.builder(
-                  itemCount: snapshot.data!.length,
-                  itemBuilder: (_, int position) {
-                    final item = snapshot.data![position];
-                    //get your item data here ...
-                    return Card(
-                      child: ListTile(
-                        title: Text(
-                            "Employee Name: " + snapshot.data![position].row[1]),
-                      ),
-                    );
-                  },
-                )
-              : Center(
-                  child: CircularProgressIndicator(),
-                );
-        },
-      )
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,13 +98,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'Biblioteca virtual',
-            ),
-            IconButton(onPressed: _todosOsLivros, icon: const Icon(Icons.edit)),
-            getTodosListView()
+            filtrosOrdenamento(),
+            getLivrosListView()
           ],
         ),
       ),
@@ -140,35 +108,104 @@ class _MyHomePageState extends State<MyHomePage> {
         onPressed: _insereLivro,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), 
     );
+  }
+
+  Widget filtrosOrdenamento(){
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+        child: Column(
+          children: <Widget>[
+            SizedBox(height:20.0),
+            ExpansionTile(
+              title: const Text(
+                "Ordenar por",
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold
+                ),
+              ),
+              children: <Widget>[
+                ListTile(
+                  title: const Text('Titulo'),
+                  onTap: ()=>{
+                    ordenaListaPorTitulo()
+                  },
+                ),
+                ListTile(
+                  title: const Text('Autor'),
+                  onTap: ()=>{
+                    ordenaListaPorAutor()
+                  },
+                ),
+                ListTile(
+                  title: const Text('Editora'),
+                  onTap: ()=>{
+                    ordenaListaPorEditora()
+                  },
+                ),
+                ListTile(
+                  title: const Text('Lidos'),
+                  onTap: ()=>{
+                    ordenaListaPorLido()
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      );   
   }
 
   void _insereLivro() async{
     BibliotecaVirtual livro = BibliotecaVirtual("", "", "",0);
     await Navigator.push(context, MaterialPageRoute(builder: (context) => LivroHandlerPage(livroEdicao:livro)));    
+    listagemTodosLivros();
+    return;
   }
 
   void _editaLivro(context, livro) async{
     await Navigator.push(context, MaterialPageRoute(builder: (context) => LivroHandlerPage(livroEdicao: livro)));
-    updateListView();
+    listagemTodosLivros();
     return;
   }
 
   void _delete(context, livro) async{
-    print('Acao: deletar');
     int response = await helper.excluiLivro(livro.id);
-    print(">> $response");
-    updateListView();
+    listagemTodosLivros();
   }
 
-  void updateListView() {
-    Future<List<BibliotecaVirtual>> todoListFuture = helper.listaDeTodosOsLivros();
-      todoListFuture.then((listaLivros) {
-        setState(() {
-          this.listaLivros = listaLivros;
-        });
-      }
-    );
+  void listagemTodosLivros() {
+    Future<List<BibliotecaVirtual>> livrosListFuture = helper.listaDeTodosOsLivros();
+    atualizaListaDeLivrosBy(livrosListFuture);
+  }
+
+  void atualizaListaDeLivrosBy(Future<List<BibliotecaVirtual>> livrosListFuture){
+    livrosListFuture.then((listaLivros) {
+      setState(() {
+        this.listaLivros = listaLivros;
+      });
+    });
+  }
+  
+  void ordenaListaPorTitulo() {
+    Future<List<BibliotecaVirtual>> livrosListFuture = helper.getListaLivrosOrdenadosPorTitulo();
+    atualizaListaDeLivrosBy(livrosListFuture);
+  }
+
+  void ordenaListaPorAutor() {
+    Future<List<BibliotecaVirtual>> livrosListFuture = helper.getListaLivrosOrdenadosPorAutor();
+    atualizaListaDeLivrosBy(livrosListFuture);
+  }
+
+  void ordenaListaPorEditora() {
+    Future<List<BibliotecaVirtual>> livrosListFuture = helper.getListaLivrosOrdenadosPorEditora();
+    atualizaListaDeLivrosBy(livrosListFuture);
+  }
+
+  void ordenaListaPorLido() {
+    Future<List<BibliotecaVirtual>> livrosListFuture = helper.getListaLivrosOrdenadosPorLido();
+    atualizaListaDeLivrosBy(livrosListFuture);
   }
 }
