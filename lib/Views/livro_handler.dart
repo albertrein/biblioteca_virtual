@@ -2,27 +2,51 @@ import 'package:biblioteca_virtual/Models/biblioteca.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class Livro extends StatelessWidget {
+
+class LivroHandlerPage extends StatefulWidget {
+  final BibliotecaVirtual ?livroEdicao;
+  
+  const LivroHandlerPage({Key? key, this.livroEdicao}) : super(key: key);
+
+  @override
+  _Livro createState() =>_Livro(livroEdicao);
+}
+
+class _Livro extends State<LivroHandlerPage> {
   BibliotecaVirtual ?livro;
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController tituloController = TextEditingController();
   TextEditingController autorController = TextEditingController();
   TextEditingController editoraController = TextEditingController();
+  bool lidoController = false;
 
-  Livro();
-  Livro.edicao(BibliotecaVirtual livroEdicao){
+  _Livro(livroEdicao){
     livro = livroEdicao;
-    var livroMap = livro!.toMap();
-    tituloController.text = livroMap["titulo"];
-    autorController.text = livroMap["autor"];
-    editoraController.text = livroMap["editora"];
+  }
+
+  bool isLivroVazio(Map<String, dynamic> mapLivro){
+    if(mapLivro["titulo"] != "" && mapLivro["autor"] != "" && mapLivro["editora"] != "") {
+      return false;
+    }    
+    return true;
+  }
+
+  void preencheDadosParaEdicao(Map<String, dynamic> mapLivro){
+    tituloController.text = mapLivro["titulo"];
+    autorController.text = mapLivro["autor"];
+    editoraController.text = mapLivro["editora"];
+    mapLivro["lido"] == 1 ? lidoController = true : lidoController = false;
   }
 
   @override
   Widget build(BuildContext context) {
+    var livroMap = livro!.toMap();
+    if(!isLivroVazio(livroMap)){
+      preencheDadosParaEdicao(livroMap);
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text('Livro'),
+        title: const Text('Livro'),
         backgroundColor: Colors.black,
       ),
       body: SingleChildScrollView(
@@ -74,6 +98,21 @@ class Livro extends StatelessWidget {
                   }
                 }
               ),
+              Row(
+                children: [
+                  const Text("Lido: ", style: const TextStyle (color: Color(0XFF1921D2), fontSize: 30, fontWeight: FontWeight.bold),),
+                  Checkbox(
+                    checkColor: Colors.white,
+                    fillColor: MaterialStateProperty.resolveWith(getColor),
+                    value: lidoController,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        lidoController = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),              
               Padding(
                   padding: EdgeInsets.all(30),
                   child: Container(
@@ -96,6 +135,17 @@ class Livro extends StatelessWidget {
         ),
       ),
     );
+  }
+  Color getColor(Set<MaterialState> states) {
+    const Set<MaterialState> interactiveStates = <MaterialState>{
+      MaterialState.pressed,
+      MaterialState.hovered,
+      MaterialState.focused,
+    };
+    if (states.any(interactiveStates.contains)) {
+      return Colors.blue;
+    }
+    return Colors.blueGrey;
   }
 
 }
