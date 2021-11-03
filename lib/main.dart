@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Biblioteca Virtual',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.deepPurple,
       ),
       home: const MyHomePage(title: 'Biblioteca Virtual'),
       debugShowCheckedModeBanner: false,
@@ -66,15 +66,14 @@ class _MyHomePageState extends State<MyHomePage> {
           elevation: 2.0,
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: Text(livro.title),
+              backgroundColor: (livro.lido == 1? Colors.deepPurple: Colors.purple),
             ),
             title: Text(livro.title+" - "+livro.autor, style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(livro.editora),
             trailing: GestureDetector(
               child: const Icon(
                 Icons.delete,
-                color: Colors.blueAccent,
+                color: Colors.yellow,
               ),
               onTap: () {
                   _delete(context, livro);
