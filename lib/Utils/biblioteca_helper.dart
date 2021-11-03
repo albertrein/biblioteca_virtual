@@ -47,6 +47,16 @@ class DatabaseHelper {
     );
   }
 
+  Future<int> alteraLivro(BibliotecaVirtual biblioteca) async {
+    final db = await database;
+    return await db.update(
+      bibliotecaTable,
+      biblioteca.toMap(),
+      where: '$colId =?',
+      whereArgs: [biblioteca.id]
+    );
+  }
+
   Future <List<BibliotecaVirtual>> listaDeTodosOsLivros() async {
     final db = await database;
 

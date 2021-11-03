@@ -69,22 +69,19 @@ class _MyHomePageState extends State<MyHomePage> {
               backgroundColor: Colors.blue,
               child: Text(livro.title),
             ),
-            title:
-            Text(livro.title, style: TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(livro.title, style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(livro.autor),
             trailing: GestureDetector(
-                child: Icon(
-                  Icons.delete,
-                  color: Colors.blueAccent,
-                ),
-                onTap: () {
-                    _delete(context, livro);
-                }),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.blueAccent,
+              ),
+              onTap: () {
+                  _delete(context, livro);
+              }
+            ), 
             onTap: () {
-              print("Lista detalhes");
-              //navigateToDetail(livro, livro.title);
-
-              //faça o navigate
+              _editaLivro(context, livro);
             },
           ),
         );
@@ -148,13 +145,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _insereLivro() async{
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Livro()));
-    return;
-    var biblioteca = BibliotecaVirtual("Livro teste #2", "Carl Marx", "Saraiva", 0);
-    int response = await helper.insereLivro(biblioteca);
+    BibliotecaVirtual livro = BibliotecaVirtual("", "", "",0);
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => LivroHandlerPage(livroEdicao:livro)));    
+  }
 
-    print(response);
+  void _editaLivro(context, livro) async{
+    await Navigator.push(context, MaterialPageRoute(builder: (context) => LivroHandlerPage(livroEdicao: livro)));
     updateListView();
+    return;
   }
 
   void _delete(context, livro) async{
@@ -170,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           this.listaLivros = listaLivros;
         });
-      });
+      }
+    );
   }
 }

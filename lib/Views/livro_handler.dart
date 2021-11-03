@@ -1,6 +1,7 @@
 import 'package:biblioteca_virtual/Models/biblioteca.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:biblioteca_virtual/Utils/biblioteca_helper.dart';
 
 
 class LivroHandlerPage extends StatefulWidget {
@@ -13,25 +14,28 @@ class LivroHandlerPage extends StatefulWidget {
 }
 
 class _Livro extends State<LivroHandlerPage> {
+  DatabaseHelper helper = DatabaseHelper();
   BibliotecaVirtual ?livro;
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController tituloController = TextEditingController();
   TextEditingController autorController = TextEditingController();
   TextEditingController editoraController = TextEditingController();
   bool lidoController = false;
+  int ?idLivro;
 
   _Livro(livroEdicao){
     livro = livroEdicao;
   }
 
   bool isLivroVazio(Map<String, dynamic> mapLivro){
-    if(mapLivro["titulo"] != "" && mapLivro["autor"] != "" && mapLivro["editora"] != "") {
-      return false;
+    if(mapLivro["titulo"] == "" && mapLivro["autor"] == "" && mapLivro["editora"] == "") {
+      return true;
     }    
-    return true;
+    return false;
   }
 
   void preencheDadosParaEdicao(Map<String, dynamic> mapLivro){
+    idLivro = mapLivro["id"];
     tituloController.text = mapLivro["titulo"];
     autorController.text = mapLivro["autor"];
     editoraController.text = mapLivro["editora"];
@@ -121,7 +125,7 @@ class _Livro extends State<LivroHandlerPage> {
                       onPressed: (){
                         if(_formKey.currentState!.validate()){
                           ///executa algo
-                          //_calcular();
+                          _salvaRegistro();
                         }
                       },
                       child: const Text("Salvar",
@@ -148,4 +152,28 @@ class _Livro extends State<LivroHandlerPage> {
     return Colors.blueGrey;
   }
 
+  void _salvaRegistro() async{
+    if(idLivro != null){
+      await _alteraRegistro();
+    }else{
+      await _insereNovoRegistro();
+    }
+    voltaParaUltimaTela();
+  }
+
+  Future<int> _alteraRegistro() async {
+    var biblioteca = BibliotecaVirtual.comId(idLivro,tituloController.text, autorController.text, editoraController.text, (lidoController == true ? 1: 0));
+    int response = await helper.alteraLivro(biblioteca);
+    return response;
+  }
+
+  Future<int> _insereNovoRegistro() async {
+    var biblioteca = BibliotecaVirtual(tituloController.text, autorController.text, editoraController.text, (lidoController == true ? 1: 0));
+    int response = await helper.insereLivro(biblioteca);
+    return response;
+  }
+
+  void voltaParaUltimaTela(){
+    Navigator.pop(context, true);
+  }
 }
